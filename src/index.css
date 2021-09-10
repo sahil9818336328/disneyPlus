@@ -129,7 +129,14 @@ p {
   }
 }
 /*  global classes */
-
+.navbar__fixed {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 300;
+  box-shadow: var(--dark-shadow);
+}
 .btn {
   text-transform: uppercase;
   background: transparent;

@@ -1,27 +1,79 @@
 import React from 'react'
-import r_movie_1 from '../assets/images/r-movie-1.jfif'
-import r_movie_2 from '../assets/images/r-movie-2.jfif'
-import r_movie_3 from '../assets/images/r-movie-3.jfif'
-import r_movie_4 from '../assets/images/r-movie-4.jfif'
 import styled from 'styled-components'
+import { useSelector } from 'react-redux'
+import { selectMovies } from '../features/movie/movieSlice'
+import { Link } from 'react-router-dom'
 
 const Movies = () => {
+  const movies = useSelector(selectMovies)
   return (
     <Wrapper>
       <h4>Movies Recommended For You</h4>
       <Content>
-        <Wrap>
-          <img src={r_movie_1} alt='recommended-movies' />
-        </Wrap>
-        <Wrap>
-          <img src={r_movie_2} alt='recommended-movies' />
-        </Wrap>
-        <Wrap>
-          <img src={r_movie_3} alt='recommended-movies' />
-        </Wrap>
-        <Wrap>
-          <img src={r_movie_4} alt='recommended-movies' />
-        </Wrap>
+        {movies &&
+          movies.map((movie) => {
+            const { id, cardImg, type } = movie
+            if (type === 'recommend') {
+              return (
+                <Wrap key={id}>
+                  <Link to={`/details/${id}`}>
+                    <img src={cardImg} alt='recommended-movies' />
+                  </Link>
+                </Wrap>
+              )
+            }
+          })}
+      </Content>
+
+      <h4>Originals</h4>
+      <Content>
+        {movies &&
+          movies.map((movie) => {
+            const { id, cardImg, type } = movie
+            if (type === 'original') {
+              return (
+                <Wrap key={id}>
+                  <Link to={`/details/${id}`}>
+                    <img src={cardImg} alt='recommended-movies' />
+                  </Link>
+                </Wrap>
+              )
+            }
+          })}
+      </Content>
+
+      <h4>Latest & Trending</h4>
+      <Content>
+        {movies &&
+          movies.map((movie) => {
+            const { id, cardImg, type } = movie
+            if (type === 'new') {
+              return (
+                <Wrap key={id}>
+                  <Link to={`/details/${id}`}>
+                    <img src={cardImg} alt='recommended-movies' />
+                  </Link>
+                </Wrap>
+              )
+            }
+          })}
+      </Content>
+
+      <h4>Popular Shows</h4>
+      <Content>
+        {movies &&
+          movies.map((movie) => {
+            const { id, cardImg, type } = movie
+            if (type === 'trending') {
+              return (
+                <Wrap key={id}>
+                  <Link to={`/details/${id}`}>
+                    <img src={cardImg} alt='recommended-movies' />
+                  </Link>
+                </Wrap>
+              )
+            }
+          })}
       </Content>
     </Wrapper>
   )
@@ -39,6 +91,7 @@ const Content = styled.div`
   margin-top: 1.5rem;
   display: grid;
   gap: 25px;
+  margin-bottom: 3rem;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 `
 

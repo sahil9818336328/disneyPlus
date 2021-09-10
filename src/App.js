@@ -29,12 +29,12 @@ function App() {
             <Header />
             <Switch>
               <Route exact path='/'>
-                <Home />
-              </Route>
-              <Route exact path='/login'>
                 <Login />
               </Route>
-              <Route exact path='/details'>
+              <Route exact path='/home'>
+                <Home />
+              </Route>
+              <Route exact path='/details/:id'>
                 <Details />
               </Route>
             </Switch>

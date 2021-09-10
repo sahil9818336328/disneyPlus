@@ -1,50 +1,57 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import play from '../assets/images/play-icon-black.png'
 import trailer from '../assets/images/play-icon-white.png'
 import group from '../assets/images/group-icon.png'
+import { useParams } from 'react-router'
+import db from '../firebase'
 import styled from 'styled-components'
 
 const Details = () => {
+  const { id } = useParams()
+  const [movie, setMovies] = useState()
+
+  useEffect(() => {
+    db.collection('movies')
+      .doc(id)
+      .get()
+      .then((doc) => {
+        if (doc.exists) {
+          setMovies(doc.data())
+        }
+      })
+  }, [id])
+
   return (
     <Wrapper>
-      <Background>
-        <img
-          src='https://prod-ripcut-delivery.disney-plus.net/v1/variant/disney/4F39B7E16726ECF419DD7C49E011DD95099AA20A962B0B10AA1881A70661CE45/scale?width=1440&aspectRatio=1.78&format=jpeg'
-          alt='movie-background'
-        />
-      </Background>
-      <ImgTitle>
-        <img
-          src='https://prod-ripcut-delivery.disney-plus.net/v1/variant/disney/D7AEE1F05D10FC37C873176AAA26F777FC1B71E7A6563F36C6B1B497CAB1CEC2/scale?width=1440&aspectRatio=1.78'
-          alt='logo'
-        />
-      </ImgTitle>
-      <Controls>
-        <PlayButton>
-          <img src={play} alt='play-icon' />
-          <span>PLAY</span>
-        </PlayButton>
-        <TrailerButton>
-          <img src={trailer} alt='trailer-icon' />
-          <span>TRAILER</span>
-        </TrailerButton>
-        <AddButton>
-          <span>+</span>
-        </AddButton>
-        <GroupButton>
-          <img src={group} alt='group' />
-        </GroupButton>
-      </Controls>
+      {movie && (
+        <>
+          <Background>
+            <img src={movie.backgroundImg} alt='movie-background' />
+          </Background>
+          <ImgTitle>
+            <img src={movie.titleImg} alt='logo' />
+          </ImgTitle>
+          <Controls>
+            <PlayButton>
+              <img src={play} alt='play-icon' />
+              <span>PLAY</span>
+            </PlayButton>
+            <TrailerButton>
+              <img src={trailer} alt='trailer-icon' />
+              <span>TRAILER</span>
+            </TrailerButton>
+            <AddButton>
+              <span>+</span>
+            </AddButton>
+            <GroupButton>
+              <img src={group} alt='group' />
+            </GroupButton>
+          </Controls>
 
-      <SubTitle>2021 ~ 8m ~ Family, Fantasy, Kids, Animation</SubTitle>
-      <Description>
-        Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eos doloremque
-        optio repellendus iusto perspiciatis itaque dolore minus explicabo. Quo
-        in nisi nostrum mollitia, quaerat dignissimos, ab quas ducimus repellat
-        ea sint perferendis perspiciatis voluptatum, quibusdam explicabo
-        assumenda dolorem asperiores eum distinctio eaque voluptatem totam animi
-        quae! Recusandae magni possimus excepturi.
-      </Description>
+          <SubTitle>{movie.subTitle}</SubTitle>
+          <Description>{movie.description}</Description>
+        </>
+      )}
     </Wrapper>
   )
 }
@@ -165,6 +172,7 @@ const SubTitle = styled.div`
 const Description = styled.div`
   line-height: 1.4;
   font-size: 20px;
+  max-width: 700px;
   padding: 16px 0px;
   color: rgb(249, 249, 249);
   @media (max-width: 768px) {

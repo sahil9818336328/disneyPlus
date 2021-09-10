@@ -1,5 +1,4 @@
-import React from 'react'
-import styled from 'styled-components'
+import React, { useEffect } from 'react'
 import logo from '../assets/images/logo.svg'
 import home from '../assets/images/home-icon.svg'
 import search from '../assets/images/search-icon.svg'
@@ -7,7 +6,17 @@ import watchlist from '../assets/images/watchlist-icon.svg'
 import originals from '../assets/images/original-icon.svg'
 import movies from '../assets/images/movie-icon.svg'
 import series from '../assets/images/series-icon.svg'
-import { Link } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
+import {
+  selectUserName,
+  selectUserPhoto,
+  userLogin,
+  userLogout,
+} from '../features/user/userSlide'
+import { useSelector } from 'react-redux'
+import { auth, provider } from '../firebase'
+import styled from 'styled-components'
+import { useDispatch } from 'react-redux'
 
 const data = [
   {
@@ -43,33 +52,98 @@ const data = [
 ]
 
 const Header = () => {
+  const userName = useSelector(selectUserName)
+  const userPhoto = useSelector(selectUserPhoto)
+  const history = useHistory()
+  const dispatch = useDispatch()
+
+  useEffect(() => {
+    const navbar = document.getElementById('navbar')
+
+    window.addEventListener('scroll', function () {
+      if (window.pageYOffset > 70) {
+        navbar.classList.add('navbar__fixed')
+      } else {
+        navbar.classList.remove('navbar__fixed')
+      }
+    })
+  }, [])
+
+  useEffect(() => {
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        dispatch(
+          userLogin({
+            name: user.displayName,
+            email: user.email,
+            photo: user.photoURL,
+          })
+        )
+        history.push('/home')
+      }
+    })
+  }, [dispatch, history])
+
+  const signIn = () => {
+    auth.signInWithPopup(provider).then((result) => {
+      dispatch(
+        userLogin({
+          name: result.user.displayName,
+          email: result.user.email,
+          photo: result.user.photoURL,
+        })
+      )
+      history.push('/home')
+    })
+  }
+
+  const signOut = () => {
+    auth.signOut().then(() => {
+      dispatch(userLogout())
+      history.push('/')
+    })
+  }
+
   return (
-    <Wrapper>
-      <Link to='/'>
+    <Wrapper id='navbar'>
+      <Link to='/home'>
         <Logo src={logo} alt='logo' />
       </Link>
-      <NavMenu>
-        {data.map((item) => {
-          const { id, icon, title } = item
-          // eslint-disable-next-line jsx-a11y/anchor-is-valid
-          return (
-            <a href='#' key={id}>
-              <img src={icon} alt={icon} />
-              <span>{title}</span>
-            </a>
-          )
-        })}
-      </NavMenu>
-
-      <UserImg
-        src='https://avatars.githubusercontent.com/u/77143232?v=4'
-        alt='user'
-      />
+      {!userName ? (
+        <LoginContainer>
+          <Login onClick={signIn}>Login</Login>
+        </LoginContainer>
+      ) : (
+        <>
+          <NavMenu>
+            {data.map((item) => {
+              const { id, icon, title } = item
+              // eslint-disable-next-line jsx-a11y/anchor-is-valid
+              return (
+                <a href='#' key={id}>
+                  <img src={icon} alt={icon} />
+                  <span>{title}</span>
+                </a>
+              )
+            })}
+          </NavMenu>
+          <ToggleMenu className='menu__toggle'>
+            <div className='hamburger'></div>
+          </ToggleMenu>
+          <UserImg
+            src={userPhoto}
+            alt='user'
+            onClick={signOut}
+            title='sign out'
+          />
+        </>
+      )}
     </Wrapper>
   )
 }
 
 const Wrapper = styled.div`
+  position: relative;
   height: 70px;
   background-color: #090b13;
   display: flex;
@@ -123,11 +197,88 @@ const NavMenu = styled.div`
       }
     }
   }
+  @media (max-width: 992px) {
+    display: none;
+  }
+`
+
+const ToggleMenu = styled.div`
+  padding: 1em;
+  position: absolute;
+  top: 1.7em;
+  right: 1em;
+  cursor: pointer;
+
+  .hamburger,
+  .hamburger::before,
+  .hamburger::after {
+    content: '';
+    display: block;
+    background: var(--clr-white);
+    height: 3px;
+    width: 1.75em;
+    border-radius: 2px;
+    transition: all ease-in-out 500ms;
+  }
+
+  .hamburger::before {
+    transform: translateY(-7px);
+  }
+
+  .hamburger::after {
+    transform: translateY(4px);
+  }
+
+  .open {
+    transform: rotate(45deg);
+    background: var(--clr-grey-1);
+  }
+
+  .open::before {
+    opacity: 0;
+  }
+
+  .open::after {
+    transform: translateY(-3px) rotate(-90deg);
+    background: var(--clr-grey-1);
+  }
+
+  @media (min-width: 992px) {
+    display: none;
+  }
 `
 const UserImg = styled.img`
   width: 48px;
   height: 48px;
   cursor: pointer;
   border-radius: 50%;
+
+  @media (max-width: 992px) {
+    display: none;
+  }
 `
+
+const Login = styled.a`
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 8px 16px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  border: 1px solid #f9f9f9;
+  border-radius: 4px;
+  transition: all 0.2s ease 0s;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #f9f9f9;
+    color: #000;
+    border-color: transparent;
+  }
+`
+
+const LoginContainer = styled.div`
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+`
+
 export default Header
